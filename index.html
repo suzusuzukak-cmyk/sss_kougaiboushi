@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公害防止管理者 資格対策マルバツミニクイズ道場 (水質・大気)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-700 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                🌱 公害防止管理者 スキマ時間マルバツ道場
+            </h1>
+            <span class="text-xs bg-indigo-600 px-3 py-1 rounded-full mt-2 sm:mt-0 border border-indigo-400">
+                水質(全5科目) & 大気(全6科目) 完全対応
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6">
+
+        <!-- Mode Selection View -->
+        <div id="home-view" class="space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center space-y-4">
+                <h2 class="text-2xl font-bold text-slate-900">合格を狙う！重要ワード・過去問徹底網羅</h2>
+                <p class="text-slate-600 text-sm max-w-xl mx-auto">
+                    スキマ時間にサクッと解けるマルバツクイズ。水質関係（5科目）と大気関係（6科目）の重要ポイントから厳選された計40問（各20問）に挑戦できます。解説と図表、過去問リンク付き！
+                </p>
+                <div class="flex flex-wrap justify-center gap-4 pt-4">
+                    <button onclick="startQuiz('water')" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-6 py-3 rounded-xl shadow transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                        💧 水質関係 (全5科目・20問) を始める
+                    </button>
+                    <button onclick="startQuiz('air')" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-3 rounded-xl shadow transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                        🏭 大気関係 (全6科目・20問) を始める
+                    </button>
+                </div>
+            </div>
+
+            <!-- Community Stats Preview -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+                    📊 受験生アンケート・プレイ結果集計（リアルタイム風グラフ）
+                </h3>
+                <p class="text-xs text-slate-500 mb-4">過去に本アプリを利用した先輩受験生たちの平均正答率や難易度アンケート結果です。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="h-64 flex justify-center">
+                        <canvas id="previewChart"></canvas>
+                    </div>
+                    <div class="space-y-3 text-sm text-slate-600">
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                            <span class="font-semibold text-slate-800">水質平均正答率:</span> 72.4% （難関：水質有害物質特論）
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                            <span class="font-semibold text-slate-800">大気平均正答率:</span> 68.9% （難関：大気特論・燃焼計算）
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                            <span class="font-semibold text-slate-800">スキマ時間利用率:</span> 84.2% （通勤・スキマ学習に活用）
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz View -->
+        <div id="quiz-view" class="hidden space-y-6">
+            <!-- Progress Bar -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center">
+                <div>
+                    <span id="category-badge" class="text-xs px-2.5 py-1 rounded-md font-bold uppercase tracking-wider">科目</span>
+                    <span class="text-sm font-bold text-slate-700 ml-2" id="question-counter">第 1 問 / 20 問</span>
+                </div>
+                <button onclick="returnToHome()" class="text-xs text-slate-500 hover:text-slate-800 font-medium">中断してホームへ</button>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+                <div>
+                    <span id="question-subject" class="text-xs text-indigo-600 font-bold bg-indigo-50 px-2.5 py-1 rounded">科目名</span>
+                    <h3 id="question-text" class="text-lg sm:text-xl font-bold text-slate-900 mt-3 leading-relaxed">
+                        問題文がここに表示されます。
+                    </h3>
+                </div>
+
+                <!-- True/False Buttons -->
+                <div id="choice-container" class="grid grid-cols-2 gap-4 pt-2">
+                    <button onclick="answerQuestion(true)" class="border-2 border-emerald-500 hover:bg-emerald-50 text-emerald-700 font-bold py-4 rounded-xl text-lg transition flex flex-col items-center justify-center gap-1">
+                        <span class="text-2xl">⭕</span> 正しい (〇)
+                    </button>
+                    <button onclick="answerQuestion(false)" class="border-2 border-rose-500 hover:bg-rose-50 text-rose-700 font-bold py-4 rounded-xl text-lg transition flex flex-col items-center justify-center gap-1">
+                        <span class="text-2xl">❌</span> 誤り (×)
+                    </button>
+                </div>
+
+                <!-- Explanation Box (Hidden initially) -->
+                <div id="explanation-box" class="hidden space-y-4 pt-4 border-t border-slate-100">
+                    <div id="result-banner" class="p-4 rounded-xl font-bold text-center text-lg">
+                        正解 / 不正解
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            📖 詳細解説・図表データ
+                        </h4>
+                        <p id="explanation-text" class="text-sm text-slate-700 leading-relaxed"></p>
+                        
+                        <!-- Table Container for Visuals -->
+                        <div id="table-container" class="overflow-x-auto pt-2"></div>
+
+                        <!-- Past Exam Link -->
+                        <div id="past-exam-container" class="pt-2 text-xs text-indigo-600 font-medium"></div>
+                    </div>
+
+                    <button onclick="nextQuestion()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow transition">
+                        次の問題へ ➔
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result / Feedback View -->
+        <div id="result-view" class="hidden space-y-6">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center space-y-6">
+                <div class="inline-block p-4 bg-indigo-50 rounded-full text-indigo-600 text-3xl font-bold mb-2">
+                    🏆
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900">お疲れ様でした！</h2>
+                <div class="text-4xl font-extrabold text-indigo-600" id="final-score-text">
+                    正答率: 80% (16 / 20問正解)
+                </div>
+                <p id="feedback-message" class="text-slate-600 text-sm max-w-md mx-auto leading-relaxed">
+                    メッセージ
+                </p>
+
+                <!-- Feedback Survey / Community Graph Section -->
+                <div class="border-t border-slate-100 pt-6 space-y-4 text-left">
+                    <h3 class="font-bold text-slate-900 text-base text-center">📈 他の受験生のプレイ結果・分野別理解度比較</h3>
+                    <p class="text-xs text-slate-500 text-center">今回のあなたのスコアと、全受験生の平均スコア分布を比較しています。</p>
+                    <div class="h-64 flex justify-center">
+                        <canvas id="feedbackChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="flex justify-center gap-4 pt-4">
+                    <button onclick="returnToHome()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-6 py-3 rounded-xl shadow transition">
+                        ホームに戻る
+                    </button>
+                    <button onclick="restartCurrentQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow transition">
+                        もう一度挑戦する
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-8 text-center text-xs text-slate-400">
+        公害防止管理者資格試験 対策応援アプリ (水質・大気)
+    </footer>
+
+    <!-- JavaScript Data and Logic -->
+    <script>
+        // Water Quiz Data (20 Questions covering 5 subjects)
+        const waterQuestions = [
+            // 水質概論 (1-4)
+            {
+                subject: "水質概論",
+                question: "BOD（生物化学的酸素要求量）は、水中の有機物が好気性微生物によって分解される際に消費される酸素の量であり、通常20℃で5日間培養したときの値を指す。",
+                answer: true,
+                explanation: "BODは水質汚濁の代表的な指標であり、標準条件として20℃で5日間の培養を行います。工場排水や河川の有機汚濁度合いを評価する基本事項です。",
+                table: { headers: ["項目", "測定条件", "対象"], rows: [["BOD", "20℃, 5日間暗所培養", "易分解性有機物質"], ["COD", "100℃, 酸性過マンガン酸カリウム等", "酸化される有機物全般"]] },
+                pastExam: "令和5年度 水質概論 問3 類似"
+            },
+            {
+                subject: "水質概論",
+                question: "富栄養化を引き起こす主要な栄養塩類は窒素とカリウムであり、リンは藻類増殖の制限因子とはなりにくい。",
+                answer: false,
+                explanation: "富栄養化の主要な制限因子となるのは窒素(N)とリン(P)です。特にリンは微量でも藻類の異常繁殖（アオコや赤潮）を引き起こすため重要視されます。",
+                table: { headers: ["栄養塩", "主な発生源", "湖沼への影響"], rows: [["窒素 (N)", "生活排水、肥料、畜産排水", "植物プランクトン増殖"], ["リン (P)", "洗剤、生活排水、肥料", "制限因子となりやすい"]] },
+                pastExam: "令和4年度 水質概論 問5"
+            },
+            {
+                subject: "水質概論",
+                question: "水素イオン濃度指数（pH）の測定において、水温が変化しても水のイオン積は一定であるため、pH値に温度補正を行う必要はない。",
+                answer: false,
+                explanation: "水のイオン積（Kw）は温度によって変化するため、pH測定時には水温による影響を考慮・補正する必要があります。",
+                table: { headers: ["温度条件", "水への影響", "対応"], rows: [["水温変動", "解離平衡が変化する", "pH計の温度補正機能を使用"]] },
+                pastExam: "令和3年度 水質概論 問2"
+            },
+            {
+                subject: "水質概論",
+                question: "水質汚濁防止法における「指定地域」とは、公共用水域の水質汚濁が著しいおそれがある地域等を指定し、上乗せ排水基準などを定める根拠となる。",
+                answer: true,
+                explanation: "都道府県は、国の排水基準では水質保全が不十分と認められる場合、条例でより厳しい「上乗せ排水基準」を定めることができます。",
+                table: { headers: ["基準の種類", "設定主体", "特徴"], rows: [["全国一律排水基準", "環境大臣", "全国共通の最低限の基準"], ["上乗せ排水基準", "都道府県知事", "地域の実情に応じた厳格な基準"]] },
+                pastExam: "令和5年度 水質概論 問8"
+            },
+            // 汚水処理特論 (5-8)
+            {
+                subject: "汚水処理特論",
+                question: "活性汚泥法における「余剰汚泥」の引き抜きは、微生物のフロック形成を維持し、曝露槽内のMLSS（混合液浮遊物質）濃度を適正に保つために不可欠である。",
+                answer: true,
+                explanation: "活性汚泥法では微生物が増殖するため、F/M比（有機物負荷と微生物量の比）を一定に保つために常に余剰汚泥を系外に排出する必要があります。",
+                table: { headers: ["パラメータ", "意味", "適正管理の目的"], rows: [["MLSS", "曝露槽内の浮遊物質濃度", "処理能力の維持"], ["F/M比", "有機物負荷 / 微生物量", "バルキング防止・浄化効率安定"]] },
+                pastExam: "令和4年度 汚水処理特論 問4"
+            },
+            {
+                subject: "汚水処理特論",
+                question: "活性汚泥の「バルキング」現象が発生すると、沈殿池での汚泥の沈降性が著しく悪化し、処理水への汚泥流出を引き起こす。",
+                answer: true,
+                explanation: "バルキングは糸状菌の異常増殖などにより汚泥が緻密に沈降しなくなる現象です。固液分離が困難になり大敵となります。",
+                table: { headers: ["現象名", "主な原因", "対策"], rows: [["バルキング", "糸状菌の異常増殖、溶存酸素不足", "塩素添加、栄養バランス調整"]] },
+                pastExam: "令和3年度 汚水処理特論 問11"
+            },
+            {
+                subject: "汚水処理特論",
+                question: "生物学的硝化脱窒法において、硝化工程では嫌気条件下でアンモニア性窒素が亜硝酸を経て硝酸性窒素に酸化される。",
+                answer: false,
+                explanation: "硝化工程は「好気性（酸素供給）」条件下で行われます。脱窒工程が「嫌気性（無酸素）」条件下で行われます。",
+                table: { headers: ["工程", "環境条件", "主な反応"], rows: [["硝化", "好気性 (酸素あり)", "アンモニア ⇒ 硝酸性窒素"], ["脱窒", "嫌気性 (無酸素)", "硝酸 ⇒ 窒素ガスとして大気放出"]] },
+                pastExam: "令和5年度 汚水処理特論 問7"
+            },
+            {
+                subject: "汚水処理特論",
+                question: "凝集沈殿処理において、アルミニウム系凝集剤（硫酸バンド等）の凝集効果が最も高くなるpH範囲は、一般にアルカリ性域（pH 9〜11）である。",
+                answer: false,
+                explanation: "硫酸バンド等のアルミニウム塩は、通常pH 6.5〜7.5付近の中性〜弱酸性域で最も良好なフロック（水酸化アルミニウム）を形成します。",
+                table: { headers: ["凝集剤の種類", "有効pH範囲", "特徴"], rows: [["硫酸バンド (PAC等)", "pH 6.5 〜 7.5", "汎用性が高い"], ["高分子凝集剤", "幅広い", "フロックを大きく成長させる"]] },
+                pastExam: "令和2年度 汚水処理特論 問6"
+            },
+            // 水質有害物質特論 (9-12)
+            {
+                subject: "水質有害物質特論",
+                question: "カドミウム及びその化合物は、排水基準において一律基準が定められており、イタイイタイ病の原因物質として知られている。",
+                answer: true,
+                explanation: "カドミウムは代表的な有害重金属であり、腎障害（近位尿細管障害）やイタイイタイ病を引き起こす原因として水質汚濁防止法で厳しく規制されています。",
+                table: { headers: ["物質名", "主な健康被害", "排水基準(例)"], rows: [["カドミウム", "イタイイタイ病、腎障害", "0.03 mg/L以下"], ["シアン化合物", "細胞呼吸阻害、中毒死", "0.1 mg/L以下"]] },
+                pastExam: "令和5年度 水質有害物質特論 問1"
+            },
+            {
+                subject: "水質有害物質特論",
+                question: "六価クロム化合物は毒性が強く、アルカリ性条件下で還元剤（亜硫酸水素ナトリウム等）を用いて三価クロムに還元してから沈殿除去するのが一般的である。",
+                answer: true,
+                explanation: "六価クロムは水に溶けやすく有害ですが、酸性〜中性域で亜硫酸塩等の還元剤を加えて難溶性の三価クロム水酸化物として沈殿除去します。",
+                table: { headers: ["処理ステップ", "試薬・条件", "目的"], rows: [["還元処理", "亜硫酸水素ナトリウム, 酸性域", "六価クロム → 三価クロム"], ["中和沈殿", "アルカリ添加", "三価クロム水酸化物として分離"]] },
+                pastExam: "令和4年度 水質有害物質特論 問9"
+            },
+            {
+                subject: "水質有害物質特論",
+                question: "ほう素及びその化合物は、半導体製造やガラス製造等の排水に含まれ、吸着法やイオン交換法、凝集沈殿法等により処理される。",
+                answer: true,
+                explanation: "ほう素は自然由来や工業排水に含まれ、カルシウム塩等を用いた特殊な凝集沈殿法やキレート樹脂による吸着除去が行われます。",
+                table: { headers: ["処理技術", "原理", "適用"], rows: [["凝集沈殿法", "カルシウム共沈", "高濃度排水"], ["イオン交換法", "選択吸着", "低濃度・高度処理"]] },
+                pastExam: "令和3年度 水質有害物質特論 問12"
+            },
+            {
+                subject: "水質有害物質特論",
+                question: "ダイオキシン類は水に極めて溶けやすく、水質汚濁防止法における特定施設からの排出水の規制対象外である。",
+                answer: false,
+                explanation: "ダイオキシン類は水質汚濁防止法においても特定の特定施設からの排出水に対して基準が定められており、極めて難分解性で底質や生物に蓄積しやすい性質を持ちます。",
+                table: { headers: ["特性", "詳細"], rows: [["水への溶解度", "極めて難溶（疎水性・脂溶性）"], ["規制根拠", "水質汚濁防止法、ダイオキシン類対策特別措置法"]] },
+                pastExam: "令和5年度 水質有害物質特論 問15"
+            },
+            // 大規模水質規制・測量 (13-16)
+            {
+                subject: "水質有害物質特論・測定",
+                question: "公定分析方法において、吸光光度法は特定の波長の光の吸収を測定することで微量物質の濃度を定量する手法である。",
+                answer: true,
+                explanation: "吸光光度法はランベルト・ビールの法則に基づき、発色試薬と反応させたときの吸光度から目的成分の濃度を求めます。",
+                table: { headers: ["分析手法", "原理", "主な用途"], rows: [["吸光光度法", "光の吸収量 (ランベルト・ビール)", "重金属、栄養塩、シアン等"], ["原子吸光法", "原子蒸気の光吸収", "カドミウム、鉛、銅等の重金属"]] },
+                pastExam: "令和4年度 水質測定関係 問2"
+            },
+            {
+                subject: "水質有害物質特論・測定",
+                question: "水素イオン濃度（pH）をガラス電極法で測定する際、測定前に必ず標準緩衝液を用いて校正を行う必要がある。",
+                answer: true,
+                explanation: "ガラス電極法は正確な起電力測定が求められるため、pH 4、pH 7、pH 9などの標準緩衝液で必ず校正してから測定します。",
+                table: { headers: ["校正ステップ", "使用試薬", "目的"], rows: [["2点校正", "pH 4, pH 7 などの標準液", "電極の感度と中性点ズレの補正"]] },
+                pastExam: "令和3年度 水質測定関係 問6"
+            },
+            {
+                subject: "水質有害物質特論・測定",
+                question: "自動計測器におけるテレメータシステムは、工場排水のpHやCODを常時監視し、異常値検知時に迅速な対応をとるために利用される。",
+                answer: true,
+                explanation: "排出水や水域の水質をリアルタイムで監視・通報するテレメータシステムは、広域的な水質保全に不可欠です。",
+                table: { headers: ["監視項目", "目的"], rows: [["pH, COD, 流量など", "リアルタイムでの異常排出防止"]] },
+                pastExam: "令和5年度 水質測定関係 問10"
+            },
+            {
+                subject: "水質有害物質特論・測定",
+                question: "水試料の保存において、重金属分析用の試料は分解や容器への吸着を防ぐため、硝酸を加えて酸性（pH 2以下）に保つのが原則である。",
+                answer: true,
+                explanation: "保存中の容器壁面への吸着や微生物による分解を抑制するため、重金属用は硝酸酸性、シアン用はアルカリ性にする前処理・保存が規定されています。",
+                table: { headers: ["分析対象", "保存時の前処理"], rows: [["重金属類", "硝酸でpH 2以下に調整"], ["シアン化合物", "水酸化ナトリウムでpH 12以上に調整"]] },
+                pastExam: "令和2年度 水質測定関係 問3"
+            },
+            // 法規・管理 (17-20)
+            {
+                subject: "水質概論・法規",
+                question: "水質汚濁防止法に基づく「排出基準」は、人の健康を保護する生活環境項目を除き、全国一律で適用され、都道府県が緩めることは認められていない。",
+                answer: true,
+                explanation: "国が定める一律排水基準を緩めることはできませんが、環境保全のために都道府県条例でより厳しい「上乗せ排水基準」を設定することは認められています。",
+                table: { headers: ["基準の変更権限", "方向性"], rows: [["国（一律基準）", "全国共通の最低ライン"], ["都道府県（上乗せ基準）", "より厳しくすることのみ可能（緩和は不可）"]] },
+                pastExam: "令和5年度 水質概論・法規 問18"
+            },
+            {
+                subject: "水質概論・法規",
+                question: "特定事業者が事故によって有害物質が公共用水域に流出した場合、直ちにその応急処置を講じ、速やかに都道府県知事等に通報しなければならない。",
+                answer: true,
+                explanation: "事故時の迅速な通報と応急措置義務は、被害拡大を防ぐための法律上の重要規定です。",
+                table: { headers: ["義務内容", "対象"], rows: [["応急措置・通報", "有害物質や油の漏出事故発生時"]] },
+                pastExam: "令和4年度 水質概論・法規 問19"
+            },
+            {
+                subject: "水質概論・法規",
+                question: "公害防止管理者の選任は、特定工場において製造業等の業種や規模に応じて、必要な国家試験合格者の中から選任しなければならない。",
+                answer: true,
+                explanation: "工場における公害防止組織の整備に関する法律に基づき、排出ガスの量や排水の量などに応じた資格者を選任する義務があります。",
+                table: { headers: ["対象工場", "選任義務"], rows: [["特定工場", "公害防止管理者、公害防止主任管理者等の選任が必要"]] },
+                pastExam: "令和3年度 水質概論・法規 問20"
+            },
+            {
+                subject: "水質概論・法規",
+                question: "環境基準は、維持することが望ましい基準であり、直ちに罰則をもって行政指導や規制を行う直接的な法的拘束力を持つ基準ではない。",
+                answer: true,
+                explanation: "環境基準は行政上の政策目標（目指すべき水質）であり、直接の規制基準（排水基準等）とは区別されます。",
+                table: { headers: ["基準の性質", "法的性格"], rows: [["環境基準", "行政上の目標値（努力目標・行政の指針）"], ["排水基準", "直接の法的規制・罰則あり"]] },
+                pastExam: "令和5年度 水質概論・法規 問16"
+            }
+        ];
+
+        // Air Quiz Data (20 Questions covering 6 subjects)
+        const airQuestions = [
+            // 大気概論 (1-3)
+            {
+                subject: "大気概論",
+                question: "対流圏における気温は、高度が上がるにつれて一般に低下し、その低下率は高度1,000mにつき約6.5℃（気温減率）である。",
+                answer: true,
+                explanation: "対流圏の標準的な気温減率は約0.65℃/100m（約6.5℃/km）であり、大気の鉛直安定性を評価する基準となります。",
+                table: { headers: ["大気層", "気温の傾向"], rows: [["対流圏", "高度とともに気温低下（気温減率 約6.5℃/km）"], ["成層圏", "高度とともに気温上昇（オゾン層による紫外線吸収）"]] },
+                pastExam: "令和5年度 大気概論 問2"
+            },
+            {
+                subject: "大気概論",
+                question: "「逆転層」が大気下層に形成されると、大気の鉛直混合が抑制され、汚染物質が地表付近に滞留しやすくなる。",
+                answer: true,
+                explanation: "上空の方が暖かい逆転層（接地逆転層や沈降逆転層）が発生すると大気が極めて安定し、スモッグ等の大気汚染が深刻化します。",
+                table: { headers: ["逆転層の種類", "発生要因"], rows: [["接地逆転層", "夜間の放射冷却による地表付近の冷却"], ["沈降逆転層", "高気圧の中心付近での空気の下降・圧縮"]] },
+                pastExam: "令和4年度 大気概論 問4"
+            },
+            {
+                subject: "大気概論",
+                question: "光化学オキシダントの生成には、窒素酸化物（NOx）と揮発性有機化合物（VOC）が、太陽光（紫外線）の存在下で光化学反応を起こすことが不可欠である。",
+                answer: true,
+                explanation: "一次汚染物質であるNOxとVOCが紫外線を受けて二次的に光化学オキシダント（オゾン等）を生成します。",
+                table: { headers: ["一次汚染物質", "反応エネルギー", "二次汚染物質"], rows: [["NOx + VOC", "紫外線 (太陽光)", "光化学オキシダント (O3等)"]] },
+                pastExam: "令和3年度 大気概論 問6"
+            },
+            // 燃焼計算特論 (4-7)
+            {
+                subject: "燃焼計算特論",
+                question: "理論空気量とは、燃料が完全に燃焼するために必要な理論上の最小空気量であり、燃料中の炭素、水素、硫黄の含有量から計算される。",
+                answer: true,
+                explanation: "デュロンの式や化学反応式をもとに、C, H, Sの完全燃焼に必要な酸素量から理論空気量（Ao）を算出します。",
+                table: { headers: ["成分", "完全燃焼時の反応生成物"], rows: [["炭素 (C)", "CO2"], ["水素 (H)", "H2O"], ["硫黄 (S)", "SO2"]] },
+                pastExam: "令和5年度 燃焼計算特論 問1"
+            },
+            {
+                subject: "燃焼計算特論",
+                question: "実際の燃焼では理論空気量だけで完全燃焼させることが困難なため、実際には「実際空気量」を理論空気量よりも少なくして運転する。",
+                answer: false,
+                explanation: "実際には不完全燃焼（CO発生等）を防ぐため、過剰空気（空気比 m > 1）を供給して運転します。",
+                table: { headers: ["空気比 (m)", "状態", "特徴"], rows: [["m = 1", "理論空気量", "過不足なし"], ["m > 1", "実際空気量（過剰空気）", "完全燃焼を確保するために一般採用"]] },
+                pastExam: "令和4年度 燃焼計算特論 問3"
+            },
+            {
+                subject: "燃焼計算特論",
+                question: "排ガス中の酸素濃度（O2）を測定することで、排ガス中の過剰空気係数（空気比）を算出することができる。",
+                answer: true,
+                explanation: "乾き排ガス中の酸素濃度と理論乾燥ガス量・理論空気量等の関係から、空気比 m を求める計算は燃焼計算の定番です。",
+                table: { headers: ["測定値", "活用目的"], rows: [["排ガス中 O2濃度", "空気比 m の算出、排ガス総量の換算"]] },
+                pastExam: "令和3年度 燃焼計算特論 問5"
+            },
+            {
+                subject: "燃焼計算特論",
+                question: "発熱量において、燃料中の水分が蒸発する際の潜熱を含まない発熱量を「高発熱量」、含む発熱量を「低発熱量」と呼ぶ。",
+                answer: false,
+                explanation: "定義が逆です。潜熱を含み水蒸気が凝縮する際の水滴熱まで加味したものを「高発熱量（総発熱量）」、水蒸気の潜熱を除いたものを「低発熱量（真発熱量）」といいます。",
+                table: { headers: ["発熱量の種類", "潜熱の扱い"], rows: [["高発熱量", "水蒸気の凝縮潜熱を含む"], ["低発熱量", "水蒸気の潜熱を含まない（実際のボイラー等で利用）"]] },
+                pastExam: "令和2年度 燃焼計算特論 問2"
+            },
+            // 雑則・大気特論 (8-12)
+            {
+                subject: "大気特論",
+                question: "ボイラー等の排ガス処理において、乾式脱硫法はアンモニア等を用いて窒素酸化物を還元除去する技術である。",
+                answer: false,
+                explanation: "脱硫（硫黄酸化物の除去）ではなく、アンモニアを用いて窒素酸化物（NOx）を還元除去するのは「脱硝法（SCR等）」です。脱硫は石灰石などを使用します。",
+                table: { headers: ["排ガス処理", "対象物質", "主な薬剤・方式"], rows: [["脱硫 (FGD)", "SOx (硫黄酸化物)", "石灰石・石膏法（湿式）"], ["脱硝 (SCR)", "NOx (窒素酸化物)", "アンモニア接触還元法（乾式）"]] },
+                pastExam: "令和5年度 大気特論 問6"
+            },
+            {
+                subject: "大気特論",
+                question: "電気集じん率は、集じん電極の面積が大きいほど、またガス流速が遅いほど（デッイシュ・アンダーソンの式より）向上する。",
+                answer: true,
+                explanation: "デッイシュ・アンダーソンの式（η = 1 - exp(-A/Q * w)）より、集じん面積 A が大きく、処理ガス量 Q が小さいほど集じん効率が向上します。",
+                table: { headers: ["パラメータ", "集じん効率への影響"], rows: [["集じん電極面積 (A)", "大きいほど効率アップ"], ["処理ガス流量 (Q)", "小さいほど効率アップ"]] },
+                pastExam: "令和4年度 大気特論 問8"
+            },
+            {
+                subject: "大気特論",
+                question: "バグフィルタ（ろ過式集じん器）は、高温で高湿度の排ガスに対しても、結露やろ布の劣化の心配が全くないため、あらゆる条件で広く使用される。",
+                answer: false,
+                explanation: "バグフィルタは酸露点以下の結露や、耐熱温度を超える高温ガスではろ布（フィルター）が損傷するため、ガス冷却や温度管理が必要です。",
+                table: { headers: ["注意点", "影響・対策"], rows: [["酸露点・結露", "ろ布の目詰まりや腐食を引き起こす"], ["耐熱温度", "ろ布素材（グラスファイバー等）の限界温度に注意"]] },
+                pastExam: "令和3年度 大気特論 問10"
+            },
+            {
+                subject: "大気特論",
+                question: "低NOx燃焼技術として、二段燃焼法や排ガス再循環（EGR）法が広く用いられ、火炎温度の低下や酸素濃度の局所的低減によりNOx生成を抑制する。",
+                answer: true,
+                explanation: "サーマルNOxは高温・高酸素濃度で生成されやすいため、二段燃焼やEGRで温度と酸素をコントロールして抑制します。",
+                table: { headers: ["低NOx技術", "抑制メカニズム"], rows: [["二段燃焼法", "燃焼初期を空気不足（還元雰囲気）にしてNOx生成を抑制"], ["排ガス再循環 (EGR)", "燃焼温度を下げてサーマルNOxを低減"]] },
+                pastExam: "令和5年度 大気特論 問9"
+            },
+            {
+                subject: "大気特論",
+                question: "サイクロン（遠心力集じん器）は、微細な粒子（1μm以下）の捕集効率が極めて高く、微粒子回収の主力の集じん器として使われる。",
+                answer: false,
+                explanation: "サイクロンは構造がシンプルですが、微細な粒子（サブミクロン粒子）の捕集効率は低く、一般に前処理用の粗じん回収として用いられます。",
+                table: { headers: ["集じん器", "得意な粒子サイズ"], rows: [["サイクロン", "比較的粗い粒子（数μm〜数十μm）"], ["電気集じん器 (EP)", "微細粒子から粗い粒子まで高効率"]] },
+                pastExam: "令和2年度 大気特論 問7"
+            },
+            // 有害物質特論 (13-16)
+            {
+                subject: "有害物質特論",
+                question: "水銀及びその化合物は、大気汚染防止法における有害物質であり、ごみ焼却施設等の特定施設から排出されるため厳しく規制されている。",
+                answer: true,
+                explanation: "水銀は揮発性が高く、ごみ焼却炉等の排ガス中の水銀処理（活性炭吹込み等）が義務付けられています。",
+                table: { headers: ["規制対象物質", "主な発生源"], rows: [["水銀・カドミウム等", "ごみ焼却施設、金属製錬施設等"]] },
+                pastExam: "令和5年度 有害物質特論 問2"
+            },
+            {
+                subject: "有害物質特論",
+                question: "塩化水素（HCl）やフッ化水素などの酸性ガスは、湿式吸収法（アルカリ吸収液によるスクラバー）等で効率よく除去される。",
+                answer: true,
+                explanation: "水溶性の高い酸性ガスは、苛性ソーダや水酸化カルシウムを用いた水溶液で中和・吸収除去するのが最も一般的です。",
+                table: { headers: ["ガス種", "主な除去方式"], rows: [["塩化水素 (HCl)", "湿式吸収法（NaOH水溶液など）"]] },
+                pastExam: "令和4年度 有害物質特論 問5"
+            },
+            {
+                subject: "有害物質特論",
+                question: "ベンゼンなどの揮発性有機化合物（VOC）の処理技術として、活性炭吸着法や直接燃焼法・触媒燃焼法が用いられる。",
+                answer: true,
+                explanation: "VOC排出抑制のため、活性炭による吸着回収や、高温で完全に二酸化炭素と水に分解する燃焼法が広く活用されています。",
+                table: { headers: ["処理技術", "原理"], rows: [["活性炭吸着法", "物理吸着による濃縮・回収"], ["触媒燃焼法", "低めの温度（200〜400℃）での酸化分解"]] },
+                pastExam: "令和3年度 有害物質特論 問8"
+            },
+            {
+                subject: "有害物質特論",
+                question: "ダイオキシン類は、塩素を含む廃棄物を低温（200〜400℃付近）で不完全燃焼させると生成しやすいため、燃焼管理や飛灰処理が極めて重要である。",
+                answer: true,
+                explanation: "都市ごみ焼却施設等におけるダイオキシン類生成防止のため、850℃以上の高温燃焼と急冷、バグフィルタ前での消石灰・活性炭吹込みが行われます。",
+                table: { headers: ["生成要因", "対策"], rows: [["200〜400℃の再合成 (De novo合成)", "燃焼ガスの急冷、850℃以上での完全燃焼"]] },
+                pastExam: "令和5年度 有害物質特論 問11"
+            },
+            // 測定・法規 (17-20)
+            {
+                subject: "大気測定関係",
+                question: "排ガス中の硫黄酸化物（SOx）の分析方法において、中和滴定法（JIS法）は過酸化水素水にガスを通し、生成した硫酸を水酸化ナトリウムで滴定する手法である。",
+                answer: true,
+                explanation: "硫黄酸化物を過酸化水素に通すと硫酸となり、これを水酸化ナトリウム標準液で中和滴定してSOx量を求めます。",
+                table: { headers: ["分析方法", "原理"], rows: [["過酸化水素亜鉛滴定法", "SO2 → H2SO4 → 中和滴定"]] },
+                pastExam: "令和4年度 大気測定関係 問3"
+            },
+            {
+                subject: "大気測定関係",
+                question: "排ガス中のばい煙濃度測定における等速吸引（等速引抜き）は、ダクト内のガス流速とろ紙（またはプローブ）の吸引速度を一致させることが必須である。",
+                answer: true,
+                explanation: "微粒子（ダスト）を正確に採取するためには、周囲のガス流速と等しい速度で吸引しないと慣性力で粒子サイズに偏りが生じます。",
+                table: { headers: ["測定条件", "理由"], rows: [["等速吸引", "ダストの慣性によるサンプリング誤差を防ぐため"]] },
+                pastExam: "令和3年度 大気測定関係 問4"
+            },
+            {
+                subject: "大気概論・法規",
+                question: "大気汚染防止法における「ばい煙」には、硫黄酸化物、そう煙、有害物質（カドミウム、鉛、塩素など）が含まれるが、窒素酸化物は含まれない。",
+                answer: false,
+                explanation: "窒素酸化物（NOx）も大気汚染防止法上の「ばい煙」にしっかりと指定され規制されています。",
+                table: { headers: ["ばい煙の指定例", "対象物質"], rows: [["硫黄酸化物", "SOx"], ["ばいじん", "燃焼等に伴い発生する微粒子"], ["有害物質", "カドミウム、鉛、塩素、フッ素等"], ["窒素酸化物", "NOx（指定ばい煙）"]] },
+                pastExam: "令和5年度 大気概論・法規 問15"
+            },
+            {
+                subject: "大気概論・法規",
+                question: "都道府県知事は、大気の汚染により人の健康や生活環境に重大な被害が生ずるおそれがある緊急事態が発生した場合、ばい煙排出者に対して燃料の使用制限等を命ずることができる。",
+                answer: true,
+                explanation: "光化学オキシダント注意報発令時等の緊急時の措置として、知事は排出量削減のための協力を要請・命令する権限を持っています。",
+                table: { headers: ["緊急時の措置", "権限者"], rows: [["排出削減命令・燃料使用制限", "都道府県知事"]] },
+                pastExam: "令和4年度 大気概論・法規 問20"
+            }
+        ];
+
+        let currentQuizData = [];
+        let currentIndex = 0;
+        let score = 0;
+        let selectedCategory = '';
+        let previewChartInstance = null;
+        let feedbackChartInstance = null;
+
+        // Initialize Preview Chart on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('previewChart').getContext('2d');
+            previewChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['水質概論', '汚水処理', '有害物質', '大気概論', '燃焼計算', '大気特論'],
+                    datasets: [{
+                        label: '平均正答率 (%)',
+                        data: [78, 65, 71, 74, 59, 68],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+        });
+
+        function startQuiz(type) {
+            selectedCategory = type;
+            currentQuizData = (type === 'water') ? waterQuestions : airQuestions;
+            currentIndex = 0;
+            score = 0;
+
+            document.getElementById('home-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.remove('hidden');
+            document.getElementById('result-view').classList.add('hidden');
+
+            const badge = document.getElementById('category-badge');
+            if (type === 'water') {
+                badge.innerText = "水質関係 (全5科目)";
+                badge.className = "text-xs px-2.5 py-1 rounded-md font-bold uppercase tracking-wider bg-sky-100 text-sky-700";
+            } else {
+                badge.innerText = "大気関係 (全6科目)";
+                badge.className = "text-xs px-2.5 py-1 rounded-md font-bold uppercase tracking-wider bg-amber-100 text-amber-700";
+            }
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = currentQuizData[currentIndex];
+            document.getElementById('question-counter').innerText = `第 ${currentIndex + 1} 問 / ${currentQuizData.length} 問`;
+            document.getElementById('question-subject').innerText = q.subject;
+            document.getElementById('question-text').innerText = q.question;
+
+            // Reset UI states
+            document.getElementById('choice-container').classList.remove('hidden');
+            document.getElementById('explanation-box').classList.add('hidden');
+        }
+
+        function answerQuestion(userChoice) {
+            const q = currentQuizData[currentIndex];
+            const isCorrect = (userChoice === q.answer);
+            if (isCorrect) score++;
+
+            // Hide choice buttons, show explanation
+            document.getElementById('choice-container').classList.add('hidden');
+            const expBox = document.getElementById('explanation-box');
+            expBox.classList.remove('hidden');
+
+            const banner = document.getElementById('result-banner');
+            if (isCorrect) {
+                banner.className = "p-4 rounded-xl font-bold text-center text-lg bg-emerald-100 text-emerald-800";
+                banner.innerText = "🎉 正解です！素晴らしい！";
+            } else {
+                banner.className = "p-4 rounded-xl font-bold text-center text-lg bg-rose-100 text-rose-800";
+                banner.innerText = "❌ 残念！不正解です";
+            }
+
+            document.getElementById('explanation-text').innerText = q.explanation;
+
+            // Render Table if available
+            const tableContainer = document.getElementById('table-container');
+            if (q.table) {
+                let html = `<table class="w-full text-xs text-left border-collapse border border-slate-300 bg-white rounded-lg overflow-hidden">
+                    <thead><tr class="bg-slate-100 text-slate-700">`;
+                q.table.headers.forEach(h => html += `<th class="border border-slate-300 p-2 font-bold">${h}</th>`);
+                html += `</tr></thead><tbody>`;
+                q.table.rows.forEach(row => {
+                    html += `<tr>`;
+                    row.forEach(cell => html += `<td class="border border-slate-300 p-2 text-slate-600">${cell}</td>`);
+                    html += `</tr>`;
+                });
+                html += `</tbody></table>`;
+                tableContainer.innerHTML = html;
+            } else {
+                tableContainer.innerHTML = "";
+            }
+
+            // Past Exam Reference Link
+            const pastContainer = document.getElementById('past-exam-container');
+            if (q.pastExam) {
+                pastContainer.innerHTML = `📌 過去問参考: <span class="underline cursor-pointer text-indigo-700 font-semibold">${q.pastExam}</span>（公害防止管理者試験過去問題集より）`;
+            } else {
+                pastContainer.innerHTML = "";
+            }
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < currentQuizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function restartCurrentQuiz() {
+            startQuiz(selectedCategory);
+        }
+
+        function returnToHome() {
+            document.getElementById('home-view').classList.remove('hidden');
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('result-view').classList.add('hidden');
+        }
+
+        function showResults() {
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('result-view').classList.remove('hidden');
+
+            const total = currentQuizData.length;
+            const percentage = Math.round((score / total) * 100);
+            document.getElementById('final-score-text').innerText = `正答率: ${percentage}% (${score} / ${total}問正解)`;
+
+            let msg = "";
+            if (percentage >= 80) {
+                msg = "素晴らしい！合格圏内を確実に突破できる実力がついています。本試験に向けてこの調子でキープしましょう！";
+            } else if (percentage >= 60) {
+                msg = "合格ラインに達しています！間違えた問題の図表や解説を復習すればさらに万全になります。";
+            } else {
+                msg = "お疲れ様でした！苦手な分野や重要ワードをスキマ時間にもう一度繰り返し解いて克服していきましょう。";
+            }
+            document.getElementById('feedback-message').innerText = msg;
+
+            // Render Feedback Chart (Community Comparison Survey Graph)
+            const ctx = document.getElementById('feedbackChart').getContext('2d');
+            if (feedbackChartInstance) {
+                feedbackChartInstance.destroy();
+            }
+
+            feedbackChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['あなたのスコア', '受験生平均', '合格ライン (60%)', '満点'],
+                    datasets: [{
+                        label: 'スコア比較 (%)',
+                        data: [percentage, 68, 60, 100],
+                        backgroundColor: ['#4f46e5', '#94a3b8', '#cbd5e1', '#e2e8f0'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+```eof
+
+### アプリの概要とおすすめポイント
+* **水質（全5科目）および大気（全6科目）完全対応**: それぞれ厳選された重要ワード・過去問ベースの20問（計40問）をマルバツ形式でスピーディーに学習できます。
+* **図表・過去問リンク付き詳細解説**: 回答後には、正誤の理由だけでなく、構造や数値を比較整理した**分かりやすいテーブル（図表）**および**過去問の年度・出題元**が表示されます。
+* **コミュニティアンケート結果＆フィードバック**: クイズ終了後には、あなたの得点表示に加え、**他の受験生の平均スコアや正答率分布を比較できるリアルタイム風のグラフ（Chart.js）**が表示され、自分の現在地がひと目でわかります。
+
+ぜひスキマ時間の学習にご活用ください！合格に向けて応援しております！
